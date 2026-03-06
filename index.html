@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>York City FC – Stadium Survey</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #C41E2A;
+    --dark-red: #8B0000;
+    --white: #F5F0EB;
+    --off-white: #EDE8E3;
+    --black: #1A1A1A;
+    --mid: #3D3D3D;
+    --stripe: rgba(196,30,42,0.07);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background-color: var(--black);
+    color: var(--white);
+    font-family: 'Source Serif 4', Georgia, serif;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* Background texture - diagonal stripes */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      -55deg,
+      transparent,
+      transparent 40px,
+      rgba(196,30,42,0.04) 40px,
+      rgba(196,30,42,0.04) 80px
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 48px;
+    animation: fadeDown 0.7s ease both;
+  }
+
+  .crest {
+    width: 72px;
+    height: 72px;
+    background: var(--red);
+    border-radius: 50% 50% 48% 48%;
+    margin: 0 auto 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 2px;
+    color: white;
+    box-shadow: 0 4px 24px rgba(196,30,42,0.5);
+    position: relative;
+  }
+
+  .crest::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50% 50% 48% 48%;
+    border: 2px solid rgba(196,30,42,0.4);
+  }
+
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.2rem, 6vw, 3.4rem);
+    letter-spacing: 3px;
+    line-height: 1;
+    color: var(--white);
+    text-shadow: 2px 2px 0 var(--dark-red);
+  }
+
+  .subtitle {
+    font-size: 0.95rem;
+    color: rgba(245,240,235,0.55);
+    margin-top: 10px;
+    font-style: italic;
+    font-weight: 300;
+    letter-spacing: 0.5px;
+  }
+
+  .divider {
+    width: 60px;
+    height: 3px;
+    background: var(--red);
+    margin: 16px auto 0;
+  }
+
+  /* Progress bar */
+  .progress-wrap {
+    margin-bottom: 36px;
+    animation: fadeUp 0.5s 0.3s ease both;
+  }
+
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: rgba(245,240,235,0.4);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .progress-bar {
+    height: 4px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--red);
+    border-radius: 2px;
+    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+    box-shadow: 0 0 8px rgba(196,30,42,0.6);
+  }
+
+  /* Question card */
+  .question-card {
+    background: rgba(245,240,235,0.04);
+    border: 1px solid rgba(245,240,235,0.08);
+    border-radius: 2px;
+    padding: 36px 36px 32px;
+    margin-bottom: 16px;
+    animation: slideIn 0.45s cubic-bezier(0.4,0,0.2,1) both;
+    backdrop-filter: blur(4px);
+  }
+
+  .question-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 3px;
+    color: var(--red);
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .question-text {
+    font-size: 1.15rem;
+    font-weight: 600;
+    line-height: 1.5;
+    color: var(--white);
+    margin-bottom: 8px;
+  }
+
+  .question-hint {
+    font-size: 0.82rem;
+    color: rgba(245,240,235,0.4);
+    font-style: italic;
+    margin-bottom: 24px;
+  }
+
+  /* Options */
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .option {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(245,240,235,0.1);
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .option::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 0;
+    background: rgba(196,30,42,0.15);
+    transition: width 0.3s ease;
+  }
+
+  .option:hover {
+    border-color: rgba(196,30,42,0.5);
+    background: rgba(196,30,42,0.08);
+  }
+
+  .option:hover::before { width: 100%; }
+
+  .option.selected {
+    border-color: var(--red);
+    background: rgba(196,30,42,0.15);
+  }
+
+  .option.selected::before { width: 100%; background: rgba(196,30,42,0.1); }
+
+  .option-dot {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(245,240,235,0.3);
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+    position: relative;
+    z-index: 1;
+  }
+
+  .option.selected .option-dot {
+    border-color: var(--red);
+    background: var(--red);
+    box-shadow: 0 0 8px rgba(196,30,42,0.5);
+  }
+
+  .option.selected .option-dot::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    background: white;
+    border-radius: 50%;
+  }
+
+  .option-label {
+    font-size: 0.95rem;
+    color: var(--white);
+    position: relative;
+    z-index: 1;
+    line-height: 1.4;
+  }
+
+  /* Scale options */
+  .scale-options {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .scale-opt {
+    flex: 1;
+    min-width: 44px;
+    padding: 12px 8px;
+    text-align: center;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(245,240,235,0.1);
+    border-radius: 2px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--white);
+    transition: all 0.2s ease;
+  }
+
+  .scale-opt:hover { border-color: rgba(196,30,42,0.5); }
+  .scale-opt.selected { border-color: var(--red); background: rgba(196,30,42,0.2); color: white; }
+
+  .scale-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 0.72rem;
+    color: rgba(245,240,235,0.35);
+    font-style: italic;
+  }
+
+  /* Text input */
+  textarea {
+    width: 100%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(245,240,235,0.15);
+    border-radius: 2px;
+    color: var(--white);
+    font-family: 'Source Serif 4', serif;
+    font-size: 0.95rem;
+    padding: 14px 16px;
+    resize: vertical;
+    min-height: 100px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  textarea:focus { border-color: var(--red); }
+  textarea::placeholder { color: rgba(245,240,235,0.25); }
+
+  /* Navigation */
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 28px;
+    gap: 12px;
+  }
+
+  .btn {
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 2px;
+    font-size: 1rem;
+    padding: 13px 32px;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-back {
+    background: transparent;
+    border: 1px solid rgba(245,240,235,0.2);
+    color: rgba(245,240,235,0.5);
+  }
+
+  .btn-back:hover {
+    border-color: rgba(245,240,235,0.5);
+    color: var(--white);
+  }
+
+  .btn-next {
+    background: var(--red);
+    color: white;
+    box-shadow: 0 4px 16px rgba(196,30,42,0.4);
+    margin-left: auto;
+  }
+
+  .btn-next:hover {
+    background: #d42030;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(196,30,42,0.5);
+  }
+
+  .btn-next:disabled {
+    background: rgba(196,30,42,0.3);
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* Thank you screen */
+  .thankyou {
+    text-align: center;
+    padding: 60px 20px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .thankyou-icon {
+    font-size: 3rem;
+    margin-bottom: 20px;
+  }
+
+  .thankyou h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.8rem;
+    letter-spacing: 3px;
+    color: var(--white);
+    margin-bottom: 12px;
+  }
+
+  .thankyou p {
+    color: rgba(245,240,235,0.55);
+    font-size: 1rem;
+    line-height: 1.7;
+    max-width: 420px;
+    margin: 0 auto 32px;
+  }
+
+  .summary-box {
+    background: rgba(245,240,235,0.04);
+    border: 1px solid rgba(245,240,235,0.08);
+    border-radius: 2px;
+    padding: 24px;
+    text-align: left;
+    margin-top: 24px;
+  }
+
+  .summary-box h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 2px;
+    color: var(--red);
+    font-size: 1rem;
+    margin-bottom: 16px;
+  }
+
+  .summary-item {
+    border-bottom: 1px solid rgba(245,240,235,0.06);
+    padding: 10px 0;
+    font-size: 0.88rem;
+  }
+
+  .summary-item:last-child { border-bottom: none; }
+
+  .summary-q {
+    color: rgba(245,240,235,0.4);
+    font-size: 0.78rem;
+    margin-bottom: 3px;
+    font-style: italic;
+  }
+
+  .summary-a {
+    color: var(--white);
+  }
+
+  /* Animations */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(30px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  /* Mobile */
+  @media (max-width: 480px) {
+    .question-card { padding: 24px 20px; }
+    .scale-opt { min-width: 36px; font-size: 0.8rem; padding: 10px 4px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="crest">YCFC</div>
+    <h1>Stadium Move Survey</h1>
+    <p class="subtitle">York City FC — Fan Consultation on the LNER Community Stadium</p>
+    <div class="divider"></div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span id="progress-text">Question 1</span>
+      <span id="progress-pct">0%</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div id="survey-area"></div>
+
+</div>
+
+<script>
+// ─── QUESTION BANK ───────────────────────────────────────────────────────────
+// Each question: { id, number, text, hint, type, options, next(answer) }
+// type: 'single' | 'scale' | 'text'
+// next: function(answer) → question id, or 'end'
+
+const questions = {
+
+  q1: {
+    id: 'q1',
+    text: 'Are you a York City FC season ticket holder or a casual/occasional fan?',
+    hint: 'This helps us understand how different supporters experience the stadium move.',
+    type: 'single',
+    options: ['Season ticket holder', 'Occasional / casual fan', 'I used to attend but no longer do', 'I have never attended but am interested in doing so'],
+    next: (a) => 'q2'
+  },
+
+  q2: {
+    id: 'q2',
+    text: 'Roughly how far do you live from the LNER Community Stadium?',
+    hint: 'Approximate distance is fine.',
+    type: 'single',
+    options: ['Within 1 mile', '1–3 miles', '3–7 miles', '7–15 miles', 'More than 15 miles away'],
+    next: (a) => {
+      if (a === 'Within 1 mile') return 'q3_walk';
+      if (a === '1–3 miles') return 'q3_close';
+      return 'q3_far';
+    }
+  },
+
+  // ── COMMUTE BRANCH: walkers/cyclists ─────────────────────────────
+  q3_walk: {
+    id: 'q3_walk',
+    text: 'Being so close, do you usually walk or cycle to matches?',
+    type: 'single',
+    options: ['Yes, I walk', 'Yes, I cycle', 'I still drive even though I\'m close', 'I use public transport'],
+    next: (a) => 'q4_community'
+  },
+
+  // ── COMMUTE BRANCH: 1–3 miles ─────────────────────────────────────
+  q3_close: {
+    id: 'q3_close',
+    text: 'How do you usually travel to the LNER Community Stadium?',
+    type: 'single',
+    options: ['Walk', 'Cycle', 'Drive and park at / near the stadium', 'Drive and park further away', 'Bus or public transport', 'Park and ride', 'Get a lift / taxi'],
+    next: (a) => {
+      if (a === 'Drive and park at / near the stadium' || a === 'Drive and park further away') return 'q_drive';
+      if (a === 'Bus or public transport' || a === 'Park and ride') return 'q_transit';
+      return 'q4_community';
+    }
+  },
+
+  // ── COMMUTE BRANCH: further away ─────────────────────────────────
+  q3_far: {
+    id: 'q3_far',
+    text: 'How do you usually travel to the LNER Community Stadium?',
+    hint: 'Select your primary method.',
+    type: 'single',
+    options: ['Drive and park at / near the stadium', 'Drive and park further away then walk', 'Train to York then walk or bus', 'Bus or coach directly', 'Park and ride', 'Get a lift / taxi', 'Other'],
+    next: (a) => {
+      if (a.includes('Drive')) return 'q_drive';
+      if (a === 'Train to York then walk or bus' || a.includes('Bus') || a === 'Park and ride') return 'q_transit';
+      return 'q4_community';
+    }
+  },
+
+  // ── DRIVING follow-up ─────────────────────────────────────────────
+  q_drive: {
+    id: 'q_drive',
+    text: 'How has driving to the LNER Community Stadium compared to your old journey to Bootham Crescent?',
+    hint: 'Think about parking, road access, time, and ease.',
+    type: 'single',
+    options: ['Much easier now', 'Slightly easier', 'About the same', 'Slightly harder / longer', 'Much harder — it\'s put me off attending'],
+    next: (a) => 'q_parking'
+  },
+
+  q_parking: {
+    id: 'q_parking',
+    text: 'How satisfied are you with the parking situation at or near the LNER Community Stadium?',
+    type: 'scale',
+    scaleMin: 1, scaleMax: 5,
+    labelLow: 'Very dissatisfied', labelHigh: 'Very satisfied',
+    next: (a) => 'q4_community'
+  },
+
+  // ── TRANSIT follow-up ─────────────────────────────────────────────
+  q_transit: {
+    id: 'q_transit',
+    text: 'How well does public transport serve the LNER Community Stadium compared to Bootham Crescent?',
+    type: 'single',
+    options: ['Much better now', 'About the same', 'Worse — fewer direct routes', 'Much worse — it\'s a real problem', 'I didn\'t use public transport to Bootham Crescent so can\'t compare'],
+    next: (a) => 'q_transit2'
+  },
+
+  q_transit2: {
+    id: 'q_transit2',
+    text: 'Has the out-of-town location of the LNER Community Stadium affected how often you use public transport to attend?',
+    type: 'single',
+    options: ['Yes — I now use public transport more', 'Yes — I now use it less and drive instead', 'No change', 'I\'ve stopped attending partly because of transport issues'],
+    next: (a) => 'q4_community'
+  },
+
+  // ── ATTENDANCE ────────────────────────────────────────────────────
+  q4_community: {
+    id: 'q4_community',
+    text: 'How often do you attend York City home matches?',
+    type: 'single',
+    options: ['Every home game', 'Most home games (75%+)', 'Around half of home games', 'A few times per season', 'Once a season or less', 'I no longer attend'],
+    next: (a) => {
+      if (a === 'I no longer attend') return 'q_stopped';
+      if (a === 'Once a season or less' || a === 'A few times per season') return 'q_rarely';
+      return 'q5_experience';
+    }
+  },
+
+  q_stopped: {
+    id: 'q_stopped',
+    text: 'You mentioned you no longer attend — what are the main reasons?',
+    hint: 'Select the most significant factor.',
+    type: 'single',
+    options: [
+      'The stadium move made it too inconvenient to get there',
+      'The cost of travel has increased too much',
+      'I lost connection with the local matchday atmosphere',
+      'The location feels disconnected from York city centre',
+      'Personal reasons unrelated to the stadium',
+      'A combination of the above'
+    ],
+    next: (a) => 'q_community_impact'
+  },
+
+  q_rarely: {
+    id: 'q_rarely',
+    text: 'What is the main reason you attend less frequently?',
+    type: 'single',
+    options: [
+      'The stadium location is harder to reach for me',
+      'Travel costs have gone up',
+      'The matchday experience is less convenient than Bootham Crescent',
+      'I\'ve lost the habit since the move',
+      'Work / family commitments — not stadium-related',
+      'Cost of tickets'
+    ],
+    next: (a) => 'q5_experience'
+  },
+
+  // ── EXPERIENCE ────────────────────────────────────────────────────
+  q5_experience: {
+    id: 'q5_experience',
+    text: 'Overall, how would you rate your matchday experience at the LNER Community Stadium?',
+    type: 'scale',
+    scaleMin: 1, scaleMax: 5,
+    labelLow: 'Very poor', labelHigh: 'Excellent',
+    next: (a) => {
+      if (parseInt(a) <= 2) return 'q5_bad';
+      return 'q5_good';
+    }
+  },
+
+  q5_bad: {
+    id: 'q5_bad',
+    text: 'What most negatively affects your experience at the LNER Community Stadium?',
+    hint: 'Select the biggest issue.',
+    type: 'single',
+    options: [
+      'Atmosphere — feels less intimate than Bootham Crescent',
+      'Getting there and back is too difficult',
+      'Lack of nearby pubs / pre-match options',
+      'Feels disconnected from the city and the community',
+      'Stadium facilities themselves',
+      'Cost (travel + matchday spend)'
+    ],
+    next: (a) => 'q6_preference'
+  },
+
+  q5_good: {
+    id: 'q5_good',
+    text: 'What do you most enjoy about the LNER Community Stadium?',
+    type: 'single',
+    options: [
+      'Better facilities and comfort',
+      'Easier to drive and park',
+      'Safer and more accessible',
+      'Modern atmosphere',
+      'Better sightlines / viewing experience',
+      'Shared with other sports / events'
+    ],
+    next: (a) => 'q6_preference'
+  },
+
+  // ── CITY CENTRE vs OUT-OF-TOWN ─────────────────────────────────────
+  q6_preference: {
+    id: 'q6_preference',
+    text: 'Do you prefer a city centre ground like Bootham Crescent, or an out-of-town stadium like the LNER Community Stadium?',
+    type: 'single',
+    options: [
+      'Strongly prefer city centre',
+      'Slightly prefer city centre',
+      'No preference',
+      'Slightly prefer out-of-town',
+      'Strongly prefer out-of-town'
+    ],
+    next: (a) => {
+      if (a.includes('city centre')) return 'q6_why_city';
+      if (a === 'No preference') return 'q7_community';
+      return 'q6_why_outoftown';
+    }
+  },
+
+  q6_why_city: {
+    id: 'q6_why_city',
+    text: 'Why do you prefer a city centre ground?',
+    hint: 'Select the most important reason.',
+    type: 'single',
+    options: [
+      'Easier to reach without a car',
+      'Part of the city\'s identity and community fabric',
+      'Pre and post-match atmosphere in nearby pubs / restaurants',
+      'More accessible for elderly or disabled fans',
+      'Tradition and history matter to me',
+      'Economic benefit to the local community'
+    ],
+    next: (a) => 'q7_community'
+  },
+
+  q6_why_outoftown: {
+    id: 'q6_why_outoftown',
+    text: 'Why do you prefer an out-of-town stadium?',
+    hint: 'Select the most important reason.',
+    type: 'single',
+    options: [
+      'Easier to drive and park',
+      'Better, more modern facilities',
+      'Less congestion and safer surroundings',
+      'More space and room to develop',
+      'Shared with other events brings in more revenue',
+      'The LNER Stadium is simply a better ground overall'
+    ],
+    next: (a) => 'q7_community'
+  },
+
+  // ── COMMUNITY IMPACT ──────────────────────────────────────────────
+  q7_community: {
+    id: 'q7_community',
+    text: 'Do you think York City\'s move to the LNER Community Stadium has had a positive or negative impact on the local community?',
+    type: 'single',
+    options: [
+      'Strongly positive — it\'s brought investment and opportunity',
+      'Slightly positive on balance',
+      'Neutral — no real difference',
+      'Slightly negative — some community connections have been lost',
+      'Strongly negative — the club feels detached from York city centre'
+    ],
+    next: (a) => 'q7_community2'
+  },
+
+  q7_community2: {
+    id: 'q7_community2',
+    text: 'How much do you think the stadium\'s out-of-town location affects businesses and footfall in York city centre on matchdays?',
+    type: 'scale',
+    scaleMin: 1, scaleMax: 5,
+    labelLow: 'No impact at all', labelHigh: 'Significant negative impact',
+    next: (a) => 'q8_bootham'
+  },
+
+  // ── BOOTHAM CRESCENT NOSTALGIA ────────────────────────────────────
+  q8_bootham: {
+    id: 'q8_bootham',
+    text: 'How do you feel about the loss of Bootham Crescent as York City\'s home ground?',
+    type: 'single',
+    options: [
+      'Very sad — it was a huge part of the club\'s identity',
+      'Somewhat sad but I understand the reasons',
+      'Neutral — grounds are just venues',
+      'Glad — Bootham Crescent was outdated and needed replacing',
+      'I never attended matches at Bootham Crescent'
+    ],
+    next: (a) => 'q9_future'
+  },
+
+  // ── FUTURE ────────────────────────────────────────────────────────
+  q9_future: {
+    id: 'q9_future',
+    text: 'Looking ahead, what would most improve your experience of attending York City matches?',
+    type: 'single',
+    options: [
+      'Better / cheaper public transport links to the LNER Stadium',
+      'More pre-match hospitality options near the ground',
+      'Improved park and ride or shuttle services',
+      'Cheaper ticket prices',
+      'More community events at the stadium beyond matchdays',
+      'Nothing — I\'m satisfied as things are'
+    ],
+    next: (a) => 'q10_open'
+  },
+
+  q10_open: {
+    id: 'q10_open',
+    text: 'Is there anything else you\'d like to share about how the stadium move has affected you, your travel, or your connection to York City and the local community?',
+    hint: 'Optional — feel free to leave blank.',
+    type: 'text',
+    next: (a) => 'end'
+  }
+};
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let history = []; // stack of question ids
+let answers = {}; // { qid: answer }
+let currentId = 'q1';
+
+// ─── RENDER ──────────────────────────────────────────────────────────────────
+function totalEstimate() {
+  // rough count for progress
+  return 14;
+}
+
+function updateProgress() {
+  const pct = Math.round((history.length / totalEstimate()) * 100);
+  const capped = Math.min(pct, 95);
+  document.getElementById('progress-fill').style.width = capped + '%';
+  document.getElementById('progress-pct').textContent = capped + '%';
+  document.getElementById('progress-text').textContent = `Question ${history.length + 1}`;
+}
+
+function renderQuestion(qid) {
+  const q = questions[qid];
+  const area = document.getElementById('survey-area');
+  const saved = answers[qid] ?? null;
+
+  let optionsHTML = '';
+
+  if (q.type === 'single') {
+    optionsHTML = `<div class="options">` +
+      q.options.map(opt => `
+        <div class="option ${saved === opt ? 'selected' : ''}" data-value="${opt}" onclick="selectOption(this, '${qid}', 'single')">
+          <div class="option-dot"></div>
+          <span class="option-label">${opt}</span>
+        </div>
+      `).join('') +
+      `</div>`;
+  }
+
+  if (q.type === 'scale') {
+    const nums = [];
+    for (let i = q.scaleMin; i <= q.scaleMax; i++) nums.push(i);
+    optionsHTML = `
+      <div class="scale-options">
+        ${nums.map(n => `<div class="scale-opt ${saved == n ? 'selected' : ''}" data-value="${n}" onclick="selectOption(this, '${qid}', 'scale')">${n}</div>`).join('')}
+      </div>
+      <div class="scale-labels"><span>${q.labelLow}</span><span>${q.labelHigh}</span></div>
+    `;
+  }
+
+  if (q.type === 'text') {
+    optionsHTML = `<textarea id="text-input" placeholder="Your thoughts…" oninput="handleText('${qid}')">${saved || ''}</textarea>`;
+  }
+
+  area.innerHTML = `
+    <div class="question-card">
+      <span class="question-number">Q${history.length + 1}</span>
+      <div class="question-text">${q.text}</div>
+      ${q.hint ? `<div class="question-hint">${q.hint}</div>` : ''}
+      ${optionsHTML}
+    </div>
+    <div class="nav">
+      ${history.length > 0 ? `<button class="btn btn-back" onclick="goBack()">← Back</button>` : '<span></span>'}
+      <button class="btn btn-next" id="btn-next" onclick="goNext('${qid}')" ${saved === null && q.type !== 'text' ? 'disabled' : ''}>
+        ${q.type === 'text' ? 'Submit Survey' : 'Next →'}
+      </button>
+    </div>
+  `;
+  updateProgress();
+}
+
+function selectOption(el, qid, type) {
+  if (type === 'single') {
+    document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+  } else {
+    document.querySelectorAll('.scale-opt').forEach(o => o.classList.remove('selected'));
+  }
+  el.classList.add('selected');
+  answers[qid] = el.dataset.value;
+  document.getElementById('btn-next').disabled = false;
+}
+
+function handleText(qid) {
+  answers[qid] = document.getElementById('text-input').value;
+}
+
+function goNext(qid) {
+  const q = questions[qid];
+  const answer = answers[qid] ?? '';
+  const nextId = q.next(answer);
+
+  history.push(qid);
+
+  if (nextId === 'end') {
+    showThankyou();
+  } else {
+    currentId = nextId;
+    renderQuestion(nextId);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+function goBack() {
+  if (history.length === 0) return;
+  currentId = history.pop();
+  renderQuestion(currentId);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showThankyou() {
+  document.getElementById('progress-fill').style.width = '100%';
+  document.getElementById('progress-pct').textContent = '100%';
+  document.getElementById('progress-text').textContent = 'Complete';
+
+  const summaryItems = Object.entries(answers)
+    .filter(([k, v]) => v && v.trim && v.trim() !== '')
+    .map(([k, v]) => {
+      const q = questions[k];
+      if (!q) return '';
+      return `<div class="summary-item"><div class="summary-q">${q.text.substring(0, 70)}${q.text.length > 70 ? '…' : ''}</div><div class="summary-a">${v}</div></div>`;
+    }).join('');
+
+  document.getElementById('survey-area').innerHTML = `
+    <div class="thankyou">
+      <div class="thankyou-icon">⚽</div>
+      <h2>Thank You!</h2>
+      <p>Your responses have been recorded. This survey is helping shape understanding of how the stadium move has affected York City fans and the wider community.</p>
+      <p style="font-size:0.82rem; color: rgba(245,240,235,0.35); margin-top:8px;">Minstermen forever.</p>
+      <div class="summary-box">
+        <h3>Your Responses</h3>
+        ${summaryItems}
+      </div>
+    </div>
+  `;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+renderQuestion('q1');
+</script>
+</body>
+</html>
